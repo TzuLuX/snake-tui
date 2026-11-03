@@ -4,6 +4,7 @@
 
 **Il classico serpente nel tuo terminale** — puro Python 3 con `curses`, zero dipendenze da installare.
 
+![Versione](https://img.shields.io/badge/versione-1.1.0-orange)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-4b8bbe?logo=python&logoColor=white)
 ![Dipendenze](https://img.shields.io/badge/dipendenze-nessuna-brightgreen)
 ![Piattaforme](https://img.shields.io/badge/piattaforme-Linux%20%C2%B7%20macOS%20%C2%B7%20WSL-8a2be2)
@@ -74,7 +75,7 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
 | `↑` `↓` `←` `→` oppure `W A S D` | muovi il serpente |
 | `m` | aiuto: **mirino laser** on/off, una linea mostra la traiettoria fino al muro |
 | `b` | aiuto: **bordi aperti** on/off, si esce da un lato e si rientra da quello opposto |
-| `f` | aiuto: **freno** on/off, il tasto opposto alla direzione di marcia rallenta il serpente |
+| `f` | aiuto: **freno** on/off, il tasto opposto alla direzione di marcia rallenta il serpente; spegnendolo si torna alla velocità normale |
 | `p` | pausa / riprendi (il riquadro di pausa mostra quali aiuti sono attivi) |
 | `r` | nuovo gioco (dopo game over o vittoria) |
 | `q` | esci |
@@ -87,7 +88,7 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
 - **Aiuti per chi inizia**, tutti spenti all'avvio e attivabili in qualsiasi momento (anche in pausa):
   - **mirino laser** (`m`): la traiettoria diventa più accesa quando punta dritta sul frutto;
   - **bordi aperti** (`b`): i muri diventano tratteggiati e si possono attraversare; resta solo il proprio corpo da evitare;
-  - **freno** (`f`): ogni pressione del tasto opposto alla marcia rallenta di 15 ms (fino a 250 ms per passo); tenendolo premuto si frena progressivamente, ma il serpente non si ferma mai. I frutti poi riaccelerano come sempre.
+  - **freno** (`f`): ogni pressione del tasto opposto alla marcia rallenta di 15 ms (fino a 250 ms per passo); tenendolo premuto si frena progressivamente, ma il serpente non si ferma mai. I frutti poi riaccelerano come sempre, e spegnendo il freno si torna subito alla velocità normale (quella che avresti senza aver mai frenato).
 - Riempi l'intero campo e vinci — in teoria. 😄
 - Il record della sessione è sempre in alto a destra; ridimensionando il terminale si ricomincia da zero.
 

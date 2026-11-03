@@ -9,7 +9,8 @@ Controlli:
     frecce o WASD : muovi il serpente
     m             : mirino laser on/off (mostra dove stai andando)
     b             : bordi aperti on/off (si esce da un lato, si rientra dall'altro)
-    f             : freno on/off (il tasto opposto alla marcia rallenta)
+    f             : freno on/off (il tasto opposto alla marcia rallenta;
+                    spegnendolo si torna alla velocità normale)
     p             : pausa / riprendi (e stato degli aiuti)
     r             : nuovo gioco (dopo lo scontro)
     q             : esci
@@ -21,6 +22,8 @@ import curses
 import math
 import random
 import time
+
+__version__ = "1.1.0"        # da aggiornare anche nel badge del README
 
 MIN_H, MIN_W = 10, 20        # area di gioco minima (in celle)
 START_DELAY_MS = 130         # passo iniziale (ms)
@@ -73,6 +76,10 @@ class Game:
     def brake(self):
         """Rallenta di un passo (il cibo poi riaccelera come sempre)."""
         self.delay_ms = min(MAX_DELAY_MS, self.delay_ms + BRAKE_MS)
+
+    def release_brake(self):
+        """Annulla le frenate: torna alla velocità che avrebbe senza freno."""
+        self.delay_ms = max(MIN_DELAY_MS, START_DELAY_MS - self.score * SPEEDUP_MS)
 
     def step(self):
         """Avanza di un tick. Restituisce 'ok', 'ate', 'dead' o 'won'."""
@@ -304,11 +311,17 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
         panel([("VITTORIA!", HEAD, bold), ("campo pieno", TEXT, 0),
                (f"punteggio {game.score}", TEXT, 0), ("", TEXT, 0),
                ("r ancora · q esci", DIM, 0)])
-    else:  # riga di piè di pagina: note o richiamo comandi
-        hint = "WASD/frecce · m mirino · b bordi · f freno · p pausa · q esci"
-        if len(hint) > 2 * pw:
-            hint = "WASD/frecce · p pausa e aiuti · q esci"
-        put(3 + ph, 1, note if note else hint, pen(DIM, None))
+    # piè di pagina: note o richiamo comandi (in partita), versione a destra
+    footer = ''
+    if state == 'playing':
+        footer = "WASD/frecce · m mirino · b bordi · f freno · p pausa · q esci"
+        if len(footer) > 2 * pw:
+            footer = "WASD/frecce · p pausa e aiuti · q esci"
+        footer = note or footer
+    put(3 + ph, 1, footer, pen(DIM, None))
+    version = f"v{__version__}"
+    if len(footer) + len(version) + 2 <= 2 * pw:        # solo se non si tocca
+        put(3 + ph, right - len(version), version, pen(DIM, None))
 
     stdscr.refresh()
 
@@ -369,6 +382,8 @@ def main(stdscr):
         if toggle:
             assists ^= {toggle[0]}
             game.wrap = 'bordi' in assists
+            if toggle[0] == 'freno' and 'freno' not in assists:
+                game.release_brake()             # freno spento: velocità normale
 
         if state == 'playing':
             stepped = False
