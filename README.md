@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐍 Snake · TUI
+# 🐍 snake-tui
 
 **Il classico serpente nel tuo terminale** — puro Python 3 con `curses`, zero dipendenze da installare.
 
@@ -93,7 +93,7 @@ Un solo file, due mondi separati:
 ## 📁 Struttura
 
 ```
-Snake/
+snake-tui/
 ├── snake.py                     # il gioco: logica + TUI curses
 ├── scripts/
 │   └── generate_screenshots.py  # rigenera le immagini del README
