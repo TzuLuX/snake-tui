@@ -68,8 +68,9 @@ def load_fonts(size):
 class FakeScreen:
     """Schermo finto: cattura le addstr() della vera snake.render()."""
 
-    def __init__(self, h, w):
+    def __init__(self, h, w, y=0, x=0):
         self.h, self.w = h, w
+        self.y, self.x = y, x      # posizione sullo schermo (come newwin)
         self.cells = {}
 
     def getmaxyx(self):
@@ -84,8 +85,15 @@ class FakeScreen:
             if 0 <= r < self.h and 0 <= cc < self.w:
                 self.cells[(r, cc)] = (ch, attr)
 
+    def overwrite(self, dst):
+        for (r, c), cell in self.cells.items():
+            dst.cells[(self.y + r, self.x + c)] = cell
+
     def refresh(self):
         pass
+
+
+snake.curses.newwin = FakeScreen   # lo sfondo pre-disegnato di render()
 
 
 class FakePen:
@@ -148,7 +156,7 @@ def draw_cell(d, x, y, cw, ch, glyph, fg, font):
         start = {'DR': 180, 'DL': 270, 'UL': 0, 'UR': 90}[sides]
         d.arc([ox - hw - t / 2, oy - hh - t / 2, ox + hw + t / 2 - 1, oy + hh + t / 2 - 1],
               start, start + 90, fill=fg, width=t)
-    elif glyph != ' ':
+    elif not glyph.isspace():
         d.text((x + hw, y + font.getmetrics()[0]), glyph, font=font, fill=fg,
                anchor="ms")
 

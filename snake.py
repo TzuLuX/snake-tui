@@ -220,6 +220,46 @@ def snake_cells(snake, state, glow=()):
             yield r, c, SHADE.get(bend, '█▀'), light, dark
 
 
+_bg = {}
+
+
+def background(game, pen):
+    """Finestra con muri (tratteggiati se i bordi sono aperti) e prato.
+
+    Si ridisegna solo quando cambiano le dimensioni del campo, i bordi o pen.
+    """
+    ph, pw = game.h, game.w
+    key = (ph, pw, game.wrap, pen)
+    if _bg.get('key') != key:
+        right = 2 * pw + 1
+        win = curses.newwin(ph + 2, right + 1, 1, 0)
+
+        def put(r, c, s, attr):
+            try:          # l'angolo in basso a destra solleva sempre errore
+                win.addstr(r, c, s, attr)
+            except curses.error:
+                pass
+
+        wall = pen(PORTAL if game.wrap else WALL, None)
+        top, bottom, side = ('▄ ', '▀ ', '█ ') if game.wrap else ('▄', '▀', '█')
+        put(0, 0, (top * (right + 1))[:right + 1], wall)
+        for r in range(ph):
+            put(1 + r, 0, side[r % len(side)], wall)
+            put(1 + r, right, side[r % len(side)], wall)
+            # spazio o spazio non separabile (identici a video) scrivono in
+            # binario l'indice di riga: senza, le righe di solo prato sono
+            # uguali a due a due e ncurses, quando la coda ne libera una, crede
+            # che il campo sia scorso e lo ridipinge tutto (sfarfallio quando
+            # il serpente scende)
+            for c in range(pw):
+                blank = ''.join('\u00a0' if r >> (2 * c + k) & 1 else ' '
+                                for k in range(2))
+                put(1 + r, 1 + 2 * c, blank, pen(None, ARENA_BG[(r + c) % 2]))
+        put(1 + ph, 0, (bottom * (right + 1))[:right + 1], wall)
+        _bg.update(key=key, win=win)
+    return _bg['win']
+
+
 def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
     h, w = stdscr.getmaxyx()
     stdscr.erase()
@@ -247,16 +287,8 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
     put(0, max(17, right + 1 - len(stats)), stats,
         pen(HEAD, None, curses.A_BOLD) if flash else pen(TEXT, None))
 
-    # muri (tratteggiati se i bordi sono aperti) e prato
-    wall = pen(PORTAL if game.wrap else WALL, None)
-    top, bottom, side = ('▄ ', '▀ ', '█ ') if game.wrap else ('▄', '▀', '█')
-    put(1, 0, (top * (right + 1))[:right + 1], wall)
-    for r in range(ph):
-        put(2 + r, 0, side[r % len(side)], wall)
-        put(2 + r, right, side[r % len(side)], wall)
-        for c in range(pw):
-            cell(r, c, '  ', None, ARENA_BG[(r + c) % 2])
-    put(2 + ph, 0, (bottom * (right + 1))[:right + 1], wall)
+    # muri e prato: finestra pre-disegnata, copiata in C a ogni frame
+    background(game, pen).overwrite(stdscr)
 
     # mirino laser: dalla testa fino al muro (o tutto il giro, a bordi aperti)
     if 'mirino' in assists and state in ('playing', 'paused'):
