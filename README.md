@@ -4,7 +4,7 @@
 
 **Il classico serpente nel tuo terminale** — puro Python 3 con `curses`, zero dipendenze da installare.
 
-![Versione](https://img.shields.io/badge/versione-1.1.0-orange)
+![Versione](https://img.shields.io/badge/versione-1.1.1-orange)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-4b8bbe?logo=python&logoColor=white)
 ![Dipendenze](https://img.shields.io/badge/dipendenze-nessuna-brightgreen)
 ![Piattaforme](https://img.shields.io/badge/piattaforme-Linux%20%C2%B7%20macOS%20%C2%B7%20WSL-8a2be2)
