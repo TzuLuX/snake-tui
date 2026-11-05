@@ -50,9 +50,10 @@ Il gioco vive nel terminale (minimo **14×42** caratteri; più è grande, meglio
 
 ## 🚀 Come iniziare
 
-Niente da installare, niente venv:
+Niente da installare, niente venv: il gioco è un solo file, `snake.py`. Scaricalo dall'[ultima release](https://github.com/TzuLuX/snake-tui/releases/latest) e lancialo:
 
 ```bash
+curl -LO https://github.com/TzuLuX/snake-tui/releases/latest/download/snake.py
 python3 snake.py
 ```
 
