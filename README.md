@@ -15,6 +15,12 @@
 
 ## 📸 Anteprima
 
+<div align="center">
+<a href="https://www.youtube.com/watch?v=kU8kt3JrYOM" title="Guarda il video su YouTube"><img src="docs/video-copertina.jpg" alt="Guarda il video su YouTube: un bot gioca a snake-tui fino a riempire tutto il campo" width="85%"></a>
+<p><a href="https://www.youtube.com/watch?v=kU8kt3JrYOM"><img src="https://img.shields.io/badge/YouTube-guarda%20il%20video%20(1%20min)-FF0000?logo=youtube&logoColor=white" alt="Guarda il video su YouTube"></a>
+<br><sub>un minuto di partita giocata da un bot, a velocità ×6, fino a riempire tutto il campo</sub></p>
+</div>
+
 Il gioco vive nel terminale (minimo **14×42** caratteri; più è grande, meglio si gioca). Ecco come appare in ogni stato:
 
 <div align="center">
@@ -41,22 +47,6 @@ Il gioco vive nel terminale (minimo **14×42** caratteri; più è grande, meglio
 </div>
 
 > Le immagini non sono "foto": sono generate dalla *vera* funzione `render()` del gioco — [vedi come](#-screenshot-come-sono-fatte).
-
-### Anteprima testuale (se le immagini non si caricano)
-
-```text
- SNAKE  ▁▂▃▄▅▆▇█   punti 14  ·  record 31
-▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-█                                        █
-█                                        █
-█        █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ ●            █
-█        █                               █
-█        █▀▀▀▀▀▀▀▄▄━━                    █
-█                                ▟▙      █
-█                                        █
-▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
- WASD/frecce · p pausa e aiuti · q esci
-```
 
 ## 🚀 Come iniziare
 
@@ -132,14 +122,14 @@ snake-tui/
 ├── snake.py                     # il gioco: logica + TUI curses
 ├── scripts/
 │   └── generate_screenshots.py  # rigenera le immagini del README
-├── docs/                        # screenshot PNG (generate, non foto)
+├── docs/                        # screenshot PNG (generate, non foto) e copertina del video
 ├── .gitignore
 └── README.md
 ```
 
 ## 🖼️ Screenshot: come sono fatte
 
-Le immagini in `docs/` sono **fedeli al gioco**: `scripts/generate_screenshots.py` fa passare la vera funzione `snake.render()` attraverso uno schermo simulato che cattura ogni carattere e i suoi colori, poi le ridisegna con Pillow dentro una finestra "stile terminale". Blocchi e linee vengono disegnati come rettangoli e archi, proprio come fanno kitty, VTE o Windows Terminal.
+Le immagini in `docs/` (copertina del video a parte, che è un fotogramma del video) sono **fedeli al gioco**: `scripts/generate_screenshots.py` fa passare la vera funzione `snake.render()` attraverso uno schermo simulato che cattura ogni carattere e i suoi colori, poi le ridisegna con Pillow dentro una finestra "stile terminale". Blocchi e linee vengono disegnati come rettangoli e archi, proprio come fanno kitty, VTE o Windows Terminal.
 
 Per rigenerarle (serve solo Pillow):
 
