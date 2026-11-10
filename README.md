@@ -66,7 +66,7 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
 | `m` | aiuto: **mirino laser** on/off, una linea mostra la traiettoria fino al muro |
 | `b` | aiuto: **bordi aperti** on/off, si esce da un lato e si rientra da quello opposto |
 | `f` | aiuto: **freno** on/off, il tasto opposto alla direzione di marcia rallenta il serpente; spegnendolo si torna alla velocità normale |
-| `p` | pausa / riprendi (il riquadro di pausa mostra quali aiuti sono attivi) |
+| `spazio` | pausa / riprendi (il riquadro di pausa mostra quali aiuti sono attivi) |
 | `r` | nuovo gioco (dopo game over o vittoria) |
 | `q` | esci |
 

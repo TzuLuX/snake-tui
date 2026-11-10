@@ -11,7 +11,7 @@ Controlli:
     b             : bordi aperti on/off (si esce da un lato, si rientra dall'altro)
     f             : freno on/off (il tasto opposto alla marcia rallenta;
                     spegnendolo si torna alla velocità normale)
-    p             : pausa / riprendi (e stato degli aiuti)
+    spazio        : pausa / riprendi (e stato degli aiuti)
     r             : nuovo gioco (dopo lo scontro)
     q             : esci
 
@@ -335,7 +335,7 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
                  ACCENT if name in assists else DIM, 0)
                 for k, (name, label) in ASSISTS.items()]
         panel([("PAUSA", ACCENT, bold), ("", TEXT, 0)] + rows
-              + [("", TEXT, 0), ("p riprendi · q esci", DIM, 0)])
+              + [("", TEXT, 0), ("spazio riprendi · q esci", DIM, 0)])
     elif state == 'gameover':
         panel([("GAME OVER", ALERT, bold), (f"punteggio {game.score}", TEXT, 0),
                ("", TEXT, 0), ("r riprova · q esci", DIM, 0)])
@@ -346,9 +346,11 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
     # piè di pagina: note o richiamo comandi (in partita), versione a destra
     footer = ''
     if state == 'playing':
-        footer = "WASD/frecce · m mirino · b bordi · f freno · p pausa · q esci"
-        if len(footer) > 2 * pw:
-            footer = "WASD/frecce · p pausa e aiuti · q esci"
+        for footer in ("WASD/frecce · m mirino · b bordi · f freno · spazio pausa · q esci",
+                       "WASD/frecce · spazio pausa e aiuti · q esci",
+                       "frecce · spazio pausa e aiuti · q esci"):   # entra sempre: ≤ 2 * MIN_W
+            if len(footer) <= 2 * pw:
+                break
         footer = note or footer
     put(3 + ph, 1, footer, pen(DIM, None))
     version = f"v{__version__}"
@@ -426,7 +428,7 @@ def main(stdscr):
                 else:
                     game.set_direction(d)
                     stepped = True
-            elif key in (ord('p'), ord('P')):
+            elif key == ord(' '):
                 state = 'paused'
             if state == 'playing' and time.monotonic() >= next_tick:
                 stepped = True                   # è scaduto il tick
@@ -443,7 +445,7 @@ def main(stdscr):
                 elif result == 'won':
                     state = 'won'
                     best = max(best, game.score)
-        elif state == 'paused' and key in (ord('p'), ord('P')):
+        elif state == 'paused' and key == ord(' '):
             state = 'playing'
             next_tick = later()
         elif state in ('gameover', 'won') and key in (ord('r'), ord('R')):
