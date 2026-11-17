@@ -116,11 +116,11 @@ class FakePen:
         return (bg, fg) if attr & curses.A_REVERSE else (fg, bg)
 
 
-def capture(state, game, note="", best=0, glow=(), assists=()):
+def capture(state, game, best=0, glow=(), assists=()):
     """Rende lo stato usando la funzione render() vera del gioco."""
     scr = FakeScreen(game.h + 4, 2 * game.w + 2)
     pen = FakePen()
-    snake.render(scr, game, state, note, best, pen, glow, assists)
+    snake.render(scr, game, state, best, pen, glow, assists)
     return scr, pen
 
 
@@ -255,20 +255,20 @@ def game_won():
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     playing = game_playing()
-    jobs = [  # file, stato, partita, nota, record, bocconi, aiuti
-        ("screenshot-gioco.png", "playing", playing, "", 41, (17,), ()),
-        ("screenshot-mirino.png", "playing", game_aiming(), "", 41, (1, 24), {"mirino"}),
-        ("screenshot-bordi.png", "playing", game_wrapping(), "", 41, (10,),
+    jobs = [  # file, stato, partita, record, bocconi, aiuti
+        ("screenshot-gioco.png", "playing", playing, 41, (17,), ()),
+        ("screenshot-mirino.png", "playing", game_aiming(), 41, (1, 24), {"mirino"}),
+        ("screenshot-bordi.png", "playing", game_wrapping(), 41, (10,),
          {"mirino", "bordi", "freno"}),
-        ("screenshot-pausa.png", "paused", game_playing(), "", 41, (17,), {"bordi", "freno"}),
-        ("screenshot-gameover.png", "gameover", game_gameover(), "", 36, (), ()),
-        ("screenshot-vittoria.png", "won", game_won(), "", 197, (), ()),
+        ("screenshot-pausa.png", "paused", game_playing(), 41, (17,), {"bordi", "freno"}),
+        ("screenshot-gameover.png", "gameover", game_gameover(), 36, (), ()),
+        ("screenshot-vittoria.png", "won", game_won(), 197, (), ()),
     ]
     print("Genero le screenshot in docs/")
-    for name, state, g, note, best, glow, assists in jobs:
+    for name, state, g, best, glow, assists in jobs:
         if "bordi" in assists:
             g.wrap = True
-        scr, pen = capture(state, g, note, best, glow, assists)
+        scr, pen = capture(state, g, best, glow, assists)
         draw_terminal(scr, pen, "snake.py - terminale", os.path.join(OUT_DIR, name))
 
 

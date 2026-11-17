@@ -4,7 +4,7 @@
 
 **Il classico serpente nel tuo terminale** — puro Python 3 con `curses`, zero dipendenze da installare.
 
-![Versione](https://img.shields.io/badge/versione-1.1.1-orange)
+![Versione](https://img.shields.io/badge/versione-1.1.2-orange)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-4b8bbe?logo=python&logoColor=white)
 ![Dipendenze](https://img.shields.io/badge/dipendenze-nessuna-brightgreen)
 ![Piattaforme](https://img.shields.io/badge/piattaforme-Linux%20%C2%B7%20macOS%20%C2%B7%20WSL-8a2be2)
@@ -81,7 +81,7 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
   - **bordi aperti** (`b`): i muri diventano tratteggiati e si possono attraversare; resta solo il proprio corpo da evitare;
   - **freno** (`f`): ogni pressione del tasto opposto alla marcia rallenta di 15 ms (fino a 250 ms per passo); tenendolo premuto si frena progressivamente, ma il serpente non si ferma mai. I frutti poi riaccelerano come sempre, e spegnendo il freno si torna subito alla velocità normale (quella che avresti senza aver mai frenato).
 - Riempi l'intero campo e vinci — in teoria. 😄
-- Il record della sessione è sempre in alto a destra; ridimensionando il terminale si ricomincia da zero.
+- Il record della sessione è sempre in alto a destra. Ridimensionando il terminale la partita va in pausa e prosegue con punti, velocità e aiuti intatti; se il campo si stringe e il serpente non ci sta più, viene ricentrato (e, se è troppo lungo, perde la parte di coda in eccesso).
 
 ## 🧠 Come è fatto
 

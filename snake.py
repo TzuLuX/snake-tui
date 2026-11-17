@@ -23,7 +23,7 @@ import math
 import random
 import time
 
-__version__ = "1.1.1"        # da aggiornare anche nel badge del README
+__version__ = "1.1.2"        # da aggiornare anche nel badge del README
 
 MIN_H, MIN_W = 10, 20        # area di gioco minima (in celle)
 START_DELAY_MS = 130         # passo iniziale (ms)
@@ -45,6 +45,15 @@ ASSISTS = {ord('m'): ('mirino', 'mirino laser'),
            ord('f'): ('freno', "freno all'indietro")}
 
 
+def toward(a, b):
+    """Direzione (dr, dc) dalla cella a alla cella vicina b.
+
+    Un vicino oltre il bordo (bordi aperti) dista ±(lato-1): vale ∓1.
+    """
+    return tuple(d if abs(d) <= 1 else (1 if d < 0 else -1)
+                 for d in (b[0] - a[0], b[1] - a[1]))
+
+
 class Game:
     """Logica pura (senza curses): facile da testare in headless."""
 
@@ -61,6 +70,33 @@ class Game:
         self.score = 0
         self.delay_ms = START_DELAY_MS
         self.food = self._spawn_food()
+
+    def resize(self, h, w):
+        """Nuove dimensioni del campo, stessa partita (punti, velocità, bordi).
+
+        Il serpente resta dov'è se entra nel campo, altrimenti va al centro
+        (lungo l'asse che non entra); se è più grande del campo, resta la
+        parte dalla testa in giù che ci sta.
+        """
+        def shift(lo, hi, size):
+            return 0 if lo >= 0 and hi < size else (size - 1 - hi - lo) // 2
+
+        r, c = self.snake[0]
+        cells, rmin, rmax, cmin, cmax = [(r, c)], r, r, c, c
+        for a, b in zip(self.snake, self.snake[1:]):
+            dr, dc = toward(a, b)      # srotolato: contiguo anche se era a
+            r, c = r + dr, c + dc      # cavallo del bordo (bordi aperti)
+            if max(rmax, r) - min(rmin, r) >= h or max(cmax, c) - min(cmin, c) >= w:
+                break                  # da qui alla coda non entra più
+            cells.append((r, c))
+            rmin, rmax = min(rmin, r), max(rmax, r)
+            cmin, cmax = min(cmin, c), max(cmax, c)
+        dr, dc = shift(rmin, rmax, h), shift(cmin, cmax, w)
+        self.h, self.w = h, w
+        self.snake = [(r + dr, c + dc) for r, c in cells]
+        if (self.food is None or self.food in self.snake
+                or self.food[0] >= h or self.food[1] >= w):
+            self.food = self._spawn_food()
 
     def _spawn_food(self):
         occupied = set(self.snake)
@@ -195,14 +231,11 @@ def snake_cells(snake, state, glow=()):
     """
     n = len(snake)
     for i, (r, c) in enumerate(snake):
-        def toward(j):
-            # un vicino oltre il bordo (bordi aperti) dista ±(lato-1): vale ∓1
-            return tuple(d if abs(d) <= 1 else (1 if d < 0 else -1)
-                         for d in (snake[j][0] - r, snake[j][1] - c))
         grass = ARENA_BG[(r + c) % 2]
         if i == 0:                                # testa: occhi in avanti
             eye = EYES.get(state, '●')
-            glyphs = {LEFT: ' ' + eye, RIGHT: eye + ' '}.get(toward(1), eye * 2)
+            glyphs = {LEFT: ' ' + eye, RIGHT: eye + ' '}.get(toward(snake[0], snake[1]),
+                                                              eye * 2)
             yield r, c, glyphs, EYE, GLOW[0][0] if 0 in glow else HEAD
             continue
         if i in glow:
@@ -210,10 +243,10 @@ def snake_cells(snake, state, glow=()):
         else:
             light, dark = BODY[i * len(BODY) // n]
         if i == n - 1:                            # punta della coda
-            tip = '━━' if toward(i - 1)[0] == 0 else '▕▏'
+            tip = '━━' if toward(snake[i], snake[i - 1])[0] == 0 else '▕▏'
             yield r, c, tip, light, grass
             continue
-        bend = frozenset((toward(i - 1), toward(i + 1)))
+        bend = frozenset((toward(snake[i], snake[i - 1]), toward(snake[i], snake[i + 1])))
         if i == n - 2 and bend in TAPER:
             yield r, c, TAPER[bend], dark, grass
         else:
@@ -260,7 +293,7 @@ def background(game, pen):
     return _bg['win']
 
 
-def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
+def render(stdscr, game, state, best, pen, glow=(), assists=()):
     h, w = stdscr.getmaxyx()
     stdscr.erase()
     ph, pw = game.h, game.w
@@ -343,7 +376,7 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
         panel([("VITTORIA!", HEAD, bold), ("campo pieno", TEXT, 0),
                (f"punteggio {game.score}", TEXT, 0), ("", TEXT, 0),
                ("r ancora · q esci", DIM, 0)])
-    # piè di pagina: note o richiamo comandi (in partita), versione a destra
+    # piè di pagina: richiamo comandi (in partita), versione a destra
     footer = ''
     if state == 'playing':
         for footer in ("WASD/frecce · m mirino · b bordi · f freno · spazio pausa · q esci",
@@ -351,7 +384,6 @@ def render(stdscr, game, state, note, best, pen, glow=(), assists=()):
                        "frecce · spazio pausa e aiuti · q esci"):   # entra sempre: ≤ 2 * MIN_W
             if len(footer) <= 2 * pw:
                 break
-        footer = note or footer
     put(3 + ph, 1, footer, pen(DIM, None))
     version = f"v{__version__}"
     if len(footer) + len(version) + 2 <= 2 * pw:        # solo se non si tocca
@@ -367,7 +399,6 @@ def main(stdscr):
         pass
     pen = make_pen()
     state = 'playing'
-    note = ''
     game = None
     best = 0
     assists = set()          # aiuti attivi: 'mirino', 'bordi', 'freno'
@@ -381,6 +412,8 @@ def main(stdscr):
         h, w = stdscr.getmaxyx()
         ok, ph, pw = fits(h, w)
         if not ok:
+            if game is not None and state == 'playing':
+                state = 'paused'         # si riprende quando c'è di nuovo spazio
             stdscr.erase()
             msg = (f"Terminale troppo piccolo: serve almeno "
                    f"{MIN_H + 4}x{2 * MIN_W + 2}. q = esci")
@@ -393,14 +426,13 @@ def main(stdscr):
                 return
             continue
 
-        resized = game is not None and (game.h, game.w) != (ph, pw)
-        if game is None or resized:
+        if game is None:
             game = Game(ph, pw)
-            state = 'playing'
-            glow = []
             next_tick = later()
-            note = "dimensioni cambiate — nuovo gioco" if resized else ''
-            game.wrap = 'bordi' in assists
+        elif (game.h, game.w) != (ph, pw):
+            game.resize(ph, pw)          # stessa partita, ferma in pausa
+            if state == 'playing':
+                state = 'paused'
 
         # attesa fino al prossimo passo: i tasti che non muovono il serpente
         # (aiuti, freno) non fanno ripartire il conto alla rovescia
@@ -454,7 +486,7 @@ def main(stdscr):
             glow = []
             next_tick = later()
 
-        render(stdscr, game, state, note, best, pen, glow, assists)
+        render(stdscr, game, state, best, pen, glow, assists)
 
 if __name__ == '__main__':
     try:
