@@ -23,7 +23,7 @@ import math
 import random
 import time
 
-__version__ = "1.1.2"        # da aggiornare anche nel badge del README
+__version__ = "1.2.0"        # da aggiornare anche nel badge del README
 
 MIN_H, MIN_W = 10, 20        # area di gioco minima (in celle)
 START_DELAY_MS = 130         # passo iniziale (ms)
