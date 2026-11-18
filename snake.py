@@ -6,16 +6,16 @@ Uso:
     python3 snake.py
 
 Controlli:
-    frecce o WASD : muovi il serpente
+    frecce o WASD : muovi il serpente (tenendo premuta la direzione di
+                    marcia scatta in avanti; la direzione opposta frena)
     m             : mirino laser on/off (mostra dove stai andando)
     b             : bordi aperti on/off (si esce da un lato, si rientra dall'altro)
-    f             : freno on/off (il tasto opposto alla marcia rallenta;
-                    spegnendolo si torna alla velocità normale)
     spazio        : pausa / riprendi (e stato degli aiuti)
     r             : nuovo gioco (dopo lo scontro)
     q             : esci
 
-Il serpente accelera a ogni frutto mangiato; muri e corpo = game over.
+Il serpente accelera a ogni frutto mangiato; la frenata dura finché i frutti
+non lo riaccelerano. Muri e corpo = game over.
 """
 
 import curses
@@ -29,8 +29,9 @@ MIN_H, MIN_W = 10, 20        # area di gioco minima (in celle)
 START_DELAY_MS = 130         # passo iniziale (ms)
 MIN_DELAY_MS = 55            # velocità massima
 SPEEDUP_MS = 4               # accelerazione per cibo mangiato
-BRAKE_MS = 15                # rallentamento per ogni colpo di freno
-MAX_DELAY_MS = 250           # velocità minima (con il freno)
+BRAKE_MS = 5                 # rallentamento per ogni pressione (o ripetizione)
+                             # della freccia opposta alla marcia
+MAX_DELAY_MS = 250           # velocità minima (frenando)
 
 UP, DOWN, LEFT, RIGHT = (-1, 0), (1, 0), (0, -1), (0, 1)
 KEYMAP = {
@@ -41,8 +42,7 @@ KEYMAP = {
 }
 # aiuti per chi inizia: tasto -> (nome, etichetta nel riquadro di pausa)
 ASSISTS = {ord('m'): ('mirino', 'mirino laser'),
-           ord('b'): ('bordi', 'bordi aperti'),
-           ord('f'): ('freno', "freno all'indietro")}
+           ord('b'): ('bordi', 'bordi aperti')}
 
 
 def toward(a, b):
@@ -112,10 +112,6 @@ class Game:
     def brake(self):
         """Rallenta di un passo (il cibo poi riaccelera come sempre)."""
         self.delay_ms = min(MAX_DELAY_MS, self.delay_ms + BRAKE_MS)
-
-    def release_brake(self):
-        """Annulla le frenate: torna alla velocità che avrebbe senza freno."""
-        self.delay_ms = max(MIN_DELAY_MS, START_DELAY_MS - self.score * SPEEDUP_MS)
 
     def step(self):
         """Avanza di un tick. Restituisce 'ok', 'ate', 'dead' o 'won'."""
@@ -311,7 +307,7 @@ def render(stdscr, game, state, best, pen, glow=(), assists=()):
 
     # intestazione
     put(0, 0, " SNAKE ", pen(16, ACCENT, curses.A_BOLD))
-    # tachimetro: 8 tacche, dalla velocità minima (freno) alla massima
+    # tachimetro: 8 tacche, dalla velocità minima (frenando) alla massima
     level = round(8 * (MAX_DELAY_MS - game.delay_ms) / (MAX_DELAY_MS - MIN_DELAY_MS))
     for i, bar in enumerate('▁▂▃▄▅▆▇█'):
         put(0, 8 + i, bar, pen(ACCENT if i < max(1, level) else PANEL, None))
@@ -379,7 +375,7 @@ def render(stdscr, game, state, best, pen, glow=(), assists=()):
     # piè di pagina: richiamo comandi (in partita), versione a destra
     footer = ''
     if state == 'playing':
-        for footer in ("WASD/frecce · m mirino · b bordi · f freno · spazio pausa · q esci",
+        for footer in ("WASD/frecce · indietro frena · m mirino · b bordi · spazio pausa · q esci",
                        "WASD/frecce · spazio pausa e aiuti · q esci",
                        "frecce · spazio pausa e aiuti · q esci"):   # entra sempre: ≤ 2 * MIN_W
             if len(footer) <= 2 * pw:
@@ -401,7 +397,7 @@ def main(stdscr):
     state = 'playing'
     game = None
     best = 0
-    assists = set()          # aiuti attivi: 'mirino', 'bordi', 'freno'
+    assists = set()          # aiuti attivi: 'mirino', 'bordi'
     glow = []                # età dei bocconi in viaggio (vedi snake_cells)
     next_tick = 0.0          # istante (time.monotonic) del prossimo passo
 
@@ -435,7 +431,7 @@ def main(stdscr):
                 state = 'paused'
 
         # attesa fino al prossimo passo: i tasti che non muovono il serpente
-        # (aiuti, freno) non fanno ripartire il conto alla rovescia
+        # (aiuti, frenata) non fanno ripartire il conto alla rovescia
         if state == 'playing':
             stdscr.timeout(max(0, math.ceil((next_tick - time.monotonic()) * 1000)))
         else:
@@ -448,15 +444,13 @@ def main(stdscr):
         if toggle:
             assists ^= {toggle[0]}
             game.wrap = 'bordi' in assists
-            if toggle[0] == 'freno' and 'freno' not in assists:
-                game.release_brake()             # freno spento: velocità normale
 
         if state == 'playing':
             stepped = False
             if key in KEYMAP:
                 d = KEYMAP[key]
-                if 'freno' in assists and d == (-game.direction[0], -game.direction[1]):
-                    game.brake()                 # indietro = frena
+                if d == (-game.direction[0], -game.direction[1]):
+                    game.brake()                 # indietro = frena (resta lento)
                 else:
                     game.set_direction(d)
                     stepped = True

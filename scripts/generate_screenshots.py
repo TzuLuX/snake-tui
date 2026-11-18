@@ -259,8 +259,8 @@ def main():
         ("screenshot-gioco.png", "playing", playing, 41, (17,), ()),
         ("screenshot-mirino.png", "playing", game_aiming(), 41, (1, 24), {"mirino"}),
         ("screenshot-bordi.png", "playing", game_wrapping(), 41, (10,),
-         {"mirino", "bordi", "freno"}),
-        ("screenshot-pausa.png", "paused", game_playing(), 41, (17,), {"bordi", "freno"}),
+         {"mirino", "bordi"}),
+        ("screenshot-pausa.png", "paused", game_playing(), 41, (17,), {"bordi"}),
         ("screenshot-gameover.png", "gameover", game_gameover(), 36, (), ()),
         ("screenshot-vittoria.png", "won", game_won(), 197, (), ()),
     ]

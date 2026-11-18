@@ -33,8 +33,8 @@ Il gioco vive nel terminale (minimo **14×42** caratteri; più è grande, meglio
 </div>
 
 <div align="center">
-<img src="docs/screenshot-bordi.png" alt="Bordi aperti: muri tratteggiati, il serpente esce a destra e rientra da sinistra; il tachimetro in alto segna una velocità ridotta dal freno" width="85%">
-<br><sub>con i <b>bordi aperti</b> (tasto <code>b</code>) si esce da un lato e si rientra dall'altro; il tachimetro in alto mostra la velocità (qui ridotta col <b>freno</b>, tasto <code>f</code>)</sub>
+<img src="docs/screenshot-bordi.png" alt="Bordi aperti: muri tratteggiati, il serpente esce a destra e rientra da sinistra; il tachimetro in alto segna una velocità ridotta da una frenata" width="85%">
+<br><sub>con i <b>bordi aperti</b> (tasto <code>b</code>) si esce da un lato e si rientra dall'altro; il tachimetro in alto mostra la velocità (qui ridotta <b>frenando</b>: freccia opposta alla marcia)</sub>
 </div>
 
 | Pausa | Game over |
@@ -63,10 +63,10 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
 
 | Tasto | Azione |
 |:--:|:--|
-| `↑` `↓` `←` `→` oppure `W A S D` | muovi il serpente |
+| `↑` `↓` `←` `→` oppure `W A S D` | muovi il serpente; tenendo premuta la direzione di marcia scatta in avanti |
+| freccia opposta alla marcia | **frena**: tenendola premuta il serpente rallenta sempre di più |
 | `m` | aiuto: **mirino laser** on/off, una linea mostra la traiettoria fino al muro |
 | `b` | aiuto: **bordi aperti** on/off, si esce da un lato e si rientra da quello opposto |
-| `f` | aiuto: **freno** on/off, il tasto opposto alla direzione di marcia rallenta il serpente; spegnendolo si torna alla velocità normale |
 | `spazio` | pausa / riprendi (il riquadro di pausa mostra quali aiuti sono attivi) |
 | `r` | nuovo gioco (dopo game over o vittoria) |
 | `q` | esci |
@@ -75,11 +75,11 @@ Serve solo **Python 3** e un terminale che sappia mostrare Unicode (Linux, macOS
 
 - Ogni frutto mangiato (mela, arancia, prugna: si alternano) vale **+1 punto** e fa crescere il serpente: il boccone lampeggia e poi resta visibile, fermo dove è stato mangiato, finché la coda non lo raggiunge: è lì che il serpente si allunga.
 - A ogni frutto il gioco **accelera**: da 130 ms per passo fino a 55 ms (il massimo).
+- **Frenare**: ogni pressione della freccia opposta alla marcia rallenta di 5 ms (fino a 250 ms per passo); tenendola premuta si frena progressivamente, ma il serpente non si ferma mai e non fa inversione. La frenata resta: il serpente torna veloce solo mangiando, frutto dopo frutto.
 - Muri e proprio corpo = **game over**.
 - **Aiuti per chi inizia**, tutti spenti all'avvio e attivabili in qualsiasi momento (anche in pausa):
   - **mirino laser** (`m`): la traiettoria diventa più accesa quando punta dritta sul frutto;
   - **bordi aperti** (`b`): i muri diventano tratteggiati e si possono attraversare; resta solo il proprio corpo da evitare;
-  - **freno** (`f`): ogni pressione del tasto opposto alla marcia rallenta di 15 ms (fino a 250 ms per passo); tenendolo premuto si frena progressivamente, ma il serpente non si ferma mai. I frutti poi riaccelerano come sempre, e spegnendo il freno si torna subito alla velocità normale (quella che avresti senza aver mai frenato).
 - Riempi l'intero campo e vinci — in teoria. 😄
 - Il record della sessione è sempre in alto a destra. Ridimensionando il terminale la partita va in pausa e prosegue con punti, velocità e aiuti intatti; se il campo si stringe e il serpente non ci sta più, viene ricentrato (e, se è troppo lungo, perde la parte di coda in eccesso).
 
@@ -100,8 +100,8 @@ Un solo file, due mondi separati:
 | `START_DELAY_MS` | 130 | passo iniziale (ms) |
 | `MIN_DELAY_MS` | 55 | velocità massima |
 | `SPEEDUP_MS` | 4 | accelerazione per ogni cibo |
-| `BRAKE_MS` | 15 | rallentamento per ogni colpo di freno |
-| `MAX_DELAY_MS` | 250 | velocità minima raggiungibile col freno |
+| `BRAKE_MS` | 5 | rallentamento per ogni pressione della freccia opposta alla marcia |
+| `MAX_DELAY_MS` | 250 | velocità minima raggiungibile frenando |
 | `MIN_H × MIN_W` | 10 × 20 | campo minimo giocabile (in celle) |
 
 ### 🎨 La grafica
